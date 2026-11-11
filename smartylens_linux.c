@@ -345,6 +345,20 @@ static gpointer worker(gpointer param) {
 }
 static void start_req(Req *rq) { rq->gen = ++g_gen; g_thread_unref(g_thread_new("lente", worker, rq)); }
 
+/* Finestra senza bordi sempre in primo piano. Di norma e' "override-redirect" (come un menu), la scelta
+   piu' prevedibile su X11; dentro WSL quelle finestre non vengono mostrate, quindi li' si usa una
+   finestra normale senza decorazioni. Si puo' forzare con SMARTYLENS_MANAGED=1 (o =0). */
+static int g_managed;
+static GtkWidget *make_window(void) {
+    if (!g_managed) return gtk_window_new(GTK_WINDOW_POPUP);
+    GtkWidget *w = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_decorated(GTK_WINDOW(w), FALSE);
+    /* niente "skip taskbar" ne' tipo "utility": WSL non mostrerebbe la finestra */
+    gtk_window_set_accept_focus(GTK_WINDOW(w), FALSE); gtk_window_set_focus_on_map(GTK_WINDOW(w), FALSE);
+    gtk_window_set_title(GTK_WINDOW(w), "Smarty Lens");
+    return w;
+}
+
 /* ------------------------------------------------------------------- riquadro */
 static void pointer_state(int *x, int *y, GdkModifierType *mask) {
     GdkDisplay *dp = gdk_display_get_default();
@@ -548,7 +562,7 @@ static void build_popup(void) {
     gtk_css_provider_load_from_data(cp, css, -1, NULL); g_free(css);
     gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(cp), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
 
-    g_pop = gtk_window_new(GTK_WINDOW_POPUP); gtk_widget_set_name(g_pop, "sl-pop");
+    g_pop = make_window(); gtk_widget_set_name(g_pop, "sl-pop");
     gtk_window_set_keep_above(GTK_WINDOW(g_pop), TRUE);
     GtkWidget *outer = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0); gtk_container_add(GTK_CONTAINER(g_pop), outer);
     g_msg = gtk_label_new(""); gtk_widget_set_name(g_msg, "sl-msg"); gtk_box_pack_start(GTK_BOX(outer), g_msg, FALSE, FALSE, 0);
@@ -704,7 +718,7 @@ static gboolean icon_release(GtkWidget *w, GdkEventButton *e, gpointer d) {
 }
 static void build_icon(void) {
     int N = 24 * ICON_K;
-    g_icon = gtk_window_new(GTK_WINDOW_POPUP);
+    g_icon = make_window();
     gtk_window_set_default_size(GTK_WINDOW(g_icon), N, N); gtk_widget_set_size_request(g_icon, N, N);
     gtk_window_set_keep_above(GTK_WINDOW(g_icon), TRUE);
     gtk_widget_set_app_paintable(g_icon, TRUE);
@@ -767,6 +781,8 @@ int main(int argc, char **argv) {
     g_object_get(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", &prefer, "gtk-theme-name", &theme, NULL);
     char *lower = theme ? g_ascii_strdown(theme, -1) : NULL;
     g_dark = prefer || (lower && strstr(lower, "dark")); g_free(lower); g_free(theme);
+    const char *mg = getenv("SMARTYLENS_MANAGED");
+    g_managed = mg ? atoi(mg) : getenv("WSL_DISTRO_NAME") != NULL;
     get_theme(&g_th);
     build_popup(); build_icon();
     g_signal_connect(gtk_clipboard_get(GDK_SELECTION_PRIMARY), "owner-change", G_CALLBACK(on_owner_change), NULL);
