@@ -4,3 +4,7 @@ dati/
 *.exe
 *.pdb
 .build-venv/
+
+# versione Linux compilata
+/smartylens
+/smartylens-linux-x86_64

@@ -4,7 +4,12 @@ Highlight the name of a function or method in any program and its official docum
 
 ## Download
 
-Get `SmartyLens.exe` from the [latest release](https://github.com/diego-be-bop/SmartyLens/releases/latest). It is a single 106 KB file for 64-bit Windows 10/11. macOS and Linux are not supported yet.
+From the [latest release](https://github.com/diego-be-bop/SmartyLens/releases/latest):
+
+- **Windows 10/11 (64-bit)**: `SmartyLens.exe`, a single 106 KB file.
+- **Linux (x86-64, beta)**: `smartylens-linux-x86_64`. See [Linux](#linux-beta) below.
+
+macOS is not supported yet.
 
 ## How to start it
 
@@ -28,6 +33,22 @@ Python and its standard library, NumPy, pandas, Matplotlib, scikit-learn, PyTorc
 
 To add more libraries (or other languages), open the configuration from the menu and add to the `docs=` line the names used on https://devdocs.io, for example `javascript` or `django`. In the `[alias]` section you can add your own import abbreviations (`np=numpy`). Restart Smarty Lens after editing.
 
+## Linux (beta)
+
+```
+chmod +x smartylens-linux-x86_64
+./smartylens-linux-x86_64
+```
+
+It needs GTK 3 and libcurl, which desktop distributions already have (on a minimal Debian/Ubuntu: `sudo apt install libgtk-3-0 libcurl4`).
+
+Differences from Windows:
+
+- On Linux highlighted text is readable directly (the X11 "primary selection"), so nothing is copied and the clipboard is never touched. Selections made with the keyboard work too.
+- It works with X11 applications. On a Wayland session (the default on recent Ubuntu and Fedora) it runs through XWayland and only sees text highlighted in X11/XWayland applications; text in native Wayland windows is not detected.
+- It uses more memory than the Windows version (about 90 MB, most of it GTK).
+- The Linux build is tested automatically on a virtual screen; reports from real desktops are welcome in the Issues.
+
 ## Moving it to another PC
 
 Copy `SmartyLens.exe` (64-bit Windows 10/11, no installation). If you also copy the `dati` folder you bring along your saved functions, the indexes and the configuration; otherwise it is recreated on first start.
@@ -48,13 +69,22 @@ Copy `SmartyLens.exe` (64-bit Windows 10/11, no installation). If you also copy 
 
 ## Rebuilding
 
-`smartylens.c` is the whole program. With Python installed:
+The source is three files: `smartylens_core.h` (shared logic: name recognition, index search, HTML conversion), `smartylens.c` (Windows) and `smartylens_linux.c` (Linux).
+
+Windows, with Python installed:
 
 ```
 powershell -ExecutionPolicy Bypass -File build.ps1
 ```
 
 The script creates an isolated `.build-venv` environment with the Zig compiler (PyPI package `ziglang`) and produces `SmartyLens.exe`.
+
+Linux (Debian/Ubuntu):
+
+```
+sudo apt install gcc pkg-config libgtk-3-dev libcurl4-openssl-dev
+sh build_linux.sh
+```
 
 Diagnostics: `SmartyLens.exe --cerca "np.linspace"` opens the panel straight away for a name; `SmartyLens.exe --test-cattura` checks selection capture and clipboard restore and writes the result to `dati\prova.txt`.
 
