@@ -1,0 +1,6 @@
+# dati locali: indici scaricati, funzioni salvate, configurazione personale
+dati/
+# prodotti della compilazione (l'eseguibile si scarica dalle Release)
+*.exe
+*.pdb
+.build-venv/
