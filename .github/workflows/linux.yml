@@ -9,13 +9,18 @@ permissions:
   contents: write
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    # Debian 11: glibc 2.31, cosi' il file gira anche su Ubuntu 20.04 e successive
+    container: debian:11
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
       - name: Dipendenze
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq gcc pkg-config libgtk-3-dev libcurl4-openssl-dev xvfb xdotool xclip imagemagick x11-utils
+          apt-get update -qq
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+            git ca-certificates gcc libc6-dev pkg-config libgtk-3-dev libcurl4-openssl-dev \
+            xvfb xauth xdotool xclip imagemagick x11-utils procps fonts-dejavu-core
+      - uses: actions/checkout@v4
       - name: Compilazione
         run: sh build_linux.sh
       - name: Prova della ricerca
@@ -34,6 +39,6 @@ jobs:
             schermata.png
       - name: Allegato alla release
         if: startsWith(github.ref, 'refs/tags/v')
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release upload "$GITHUB_REF_NAME" smartylens-linux-x86_64 --clobber
+        uses: softprops/action-gh-release@v2
+        with:
+          files: smartylens-linux-x86_64
