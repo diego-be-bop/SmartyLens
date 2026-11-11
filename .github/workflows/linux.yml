@@ -10,8 +10,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Debian 11: glibc 2.31, cosi' il file gira anche su Ubuntu 20.04 e successive
-    container: debian:11
+    # Debian 12: glibc 2.36, cosi' il file gira su Debian 12+, Ubuntu 24.04+, Fedora 37+
+    container: debian:12
     timeout-minutes: 15
     steps:
       - name: Dipendenze

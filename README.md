@@ -7,7 +7,7 @@ Highlight the name of a function or method in any program and its official docum
 From the [latest release](https://github.com/diego-be-bop/SmartyLens/releases/latest):
 
 - **Windows 10/11 (64-bit)**: `SmartyLens.exe`, a single 106 KB file.
-- **Linux (x86-64, beta)**: `smartylens-linux-x86_64`. See [Linux](#linux-beta) below.
+- **Linux (x86-64, beta)**: `smartylens-linux-x86_64`, for Debian 12+, Ubuntu 24.04+, Fedora 37+ and other distributions with glibc 2.36 or newer. See [Linux](#linux-beta) below.
 
 macOS is not supported yet.
 
