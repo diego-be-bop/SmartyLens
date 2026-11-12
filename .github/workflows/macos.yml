@@ -1,0 +1,36 @@
+name: macOS
+on:
+  push:
+    branches: [main, macos]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compilazione
+        run: sh build_mac.sh
+      - name: Prova della ricerca
+        run: |
+          ./SmartyLens.app/Contents/MacOS/SmartyLens --test "np.linspace(0, 1, 5)" | tee out.txt
+          grep -q "titolo=numpy.linspace" out.txt
+          lipo -archs SmartyLens.app/Contents/MacOS/SmartyLens
+      - name: Prova dell'interfaccia
+        run: SHOT=$PWD/schermata-mac.png bash tests/mac_gui_test.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smartylens-macos
+          path: |
+            SmartyLens-macos.zip
+            schermata-mac.png
+      - name: Allegato alla release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: SmartyLens-macos.zip

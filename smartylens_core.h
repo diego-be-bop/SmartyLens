@@ -17,6 +17,16 @@
 #endif
 
 #define MAXC 6
+/* Caratteri del testo formattato; la piattaforma puo' ridefinirli prima di includere questo file. */
+#ifndef SL_FONT_UI
+#define SL_FONT_UI "Segoe UI"
+#endif
+#ifndef SL_FONT_MONO
+#define SL_FONT_MONO "Consolas"
+#endif
+#ifndef SL_FONT_HALFPT
+#define SL_FONT_HALFPT 19                          /* dimensione in mezzi punti */
+#endif
 #define SL_R(c) ((int)((c) & 0xFF))
 #define SL_G(c) ((int)(((c) >> 8) & 0xFF))
 #define SL_B(c) ((int)(((c) >> 16) & 0xFF))
@@ -512,11 +522,11 @@ static void strip_text(const char *p, const char *end, Buf *out) {
 static char *build_rtf(const char *sig, size_t siglen, const char *body, size_t blen) {
     Theme t; get_theme(&t);
     Buf o = {0};
-    buf_puts(&o, "{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0\\fswiss Segoe UI;}{\\f1\\fmodern Consolas;}}");
+    buf_puts(&o, "{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0\\fswiss " SL_FONT_UI ";}{\\f1\\fmodern " SL_FONT_MONO ";}}");
     buf_printf(&o, "{\\colortbl ;\\red%d\\green%d\\blue%d;\\red%d\\green%d\\blue%d;\\red%d\\green%d\\blue%d;\\red%d\\green%d\\blue%d;}",
         SL_R(t.text), SL_G(t.text), SL_B(t.text), SL_R(t.dim), SL_G(t.dim), SL_B(t.dim),
         SL_R(t.code), SL_G(t.code), SL_B(t.code), SL_R(t.accent), SL_G(t.accent), SL_B(t.accent));
-    buf_puts(&o, "\\viewkind4\\uc1\\fs19 ");
+    buf_printf(&o, "\\viewkind4\\uc1\\fs%d ", SL_FONT_HALFPT);
     RC r; memset(&r, 0, sizeof r); r.o = &o; r.lastFmt = -1;
     if (siglen) {
         buf_puts(&o, "\\pard\\sa140\\f1\\cf4 ");

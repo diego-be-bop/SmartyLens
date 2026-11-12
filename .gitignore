@@ -8,3 +8,7 @@ dati/
 # versione Linux compilata
 /smartylens
 /smartylens-linux-x86_64
+
+# versione macOS compilata
+/SmartyLens.app/
+/SmartyLens-macos.zip
