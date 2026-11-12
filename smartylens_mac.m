@@ -377,6 +377,7 @@ static void build_ui(void) {
     NSRect vf = [NSScreen mainScreen].visibleFrame;
     CGFloat x = ini_int("x", -1), y = ini_int("y", -1); BOOL ok = NO;
     for (NSScreen *s in [NSScreen screens]) if (NSPointInRect(NSMakePoint(x + N / 2, y + N / 2), s.frame)) ok = YES;
+    if (x == -1 && y == -1) ok = NO;                               /* posizione mai salvata */
     if (!ok) { x = NSMaxX(vf) - N - 28; y = NSMinY(vf) + vf.size.height * 2 / 3; }
     g_icon = make_panel(NSMakeRect(x, y, N, N));
     g_iconView = [[SLIconView alloc] initWithFrame:NSMakeRect(0, 0, N, N)];

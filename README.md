@@ -7,9 +7,8 @@ Highlight the name of a function or method in any program and its official docum
 From the [latest release](https://github.com/diego-be-bop/SmartyLens/releases/latest):
 
 - **Windows 10/11 (64-bit)**: `SmartyLens.exe`, a single 106 KB file.
-- **Linux (x86-64, beta)**: `smartylens-linux-x86_64`, for Debian 12+, Ubuntu 24.04+, Fedora 37+ and other distributions with glibc 2.36 or newer. See [Linux](#linux-beta) below.
-
-macOS is not supported yet.
+- **Linux (x86-64)**: `smartylens-linux-x86_64`, for Debian 12+, Ubuntu 24.04+, Fedora 37+ and other distributions with glibc 2.36 or newer. See [Linux](#linux) below.
+- **macOS 11 or later (Apple Silicon and Intel, beta)**: `SmartyLens-macos.zip`. See [macOS](#macos-beta) below.
 
 ## How to start it
 
@@ -33,7 +32,7 @@ Python and its standard library, NumPy, pandas, Matplotlib, scikit-learn, PyTorc
 
 To add more libraries (or other languages), open the configuration from the menu and add to the `docs=` line the names used on https://devdocs.io, for example `javascript` or `django`. In the `[alias]` section you can add your own import abbreviations (`np=numpy`). Restart Smarty Lens after editing.
 
-## Linux (beta)
+## Linux
 
 ```
 chmod +x smartylens-linux-x86_64
@@ -47,7 +46,20 @@ Differences from Windows:
 - On Linux highlighted text is readable directly (the X11 "primary selection"), so nothing is copied and the clipboard is never touched. Selections made with the keyboard work too.
 - It works with X11 applications. On a Wayland session (the default on recent Ubuntu and Fedora) it runs through XWayland and only sees text highlighted in X11/XWayland applications; text in native Wayland windows is not detected.
 - It uses more memory than the Windows version (about 90 MB, most of it GTK).
-- The Linux build is tested automatically on a virtual screen; reports from real desktops are welcome in the Issues.
+- The Linux build is tested automatically on a virtual screen and has been confirmed on a real Ubuntu desktop.
+
+## macOS (beta)
+
+1. Unzip `SmartyLens-macos.zip` and move `SmartyLens.app` to the Applications folder.
+2. The app is not signed with an Apple developer certificate, so the first time macOS refuses to open it. Either right-click the app and choose **Open**, or go to **System Settings → Privacy & Security** and click **Open Anyway**. From a terminal: `xattr -dr com.apple.quarantine /Applications/SmartyLens.app`.
+3. The robot squirrel appears near the right edge of the screen (there is no Dock icon). Click it: macOS asks for the **Accessibility** permission, which Smarty Lens needs to read the text you highlight. Enable it in **System Settings → Privacy & Security → Accessibility**, then highlight a function.
+
+Notes:
+
+- Highlighted text is read through the Accessibility API, without touching the clipboard. In applications that do not expose their text that way, Smarty Lens falls back to a simulated Cmd+C and then restores the clipboard.
+- Data (indexes, saved functions, configuration) lives in `~/Library/Application Support/SmartyLens`.
+- After updating to a new version you may have to remove Smarty Lens from the Accessibility list and add it again.
+- Building, searching and the popup are tested automatically on a real Mac, but reading highlighted text cannot be tested automatically (it needs the permission above): reports are welcome in the Issues.
 
 ## Moving it to another PC
 
@@ -69,7 +81,7 @@ Copy `SmartyLens.exe` (64-bit Windows 10/11, no installation). If you also copy 
 
 ## Rebuilding
 
-The source is three files: `smartylens_core.h` (shared logic: name recognition, index search, HTML conversion), `smartylens.c` (Windows) and `smartylens_linux.c` (Linux).
+The source is five files: `smartylens_core.h` (logic shared by all systems: name recognition, index search, HTML conversion, icon), `smartylens_posix.h` (files, network and lookup shared by Linux and macOS), and one file per system: `smartylens.c` (Windows), `smartylens_linux.c` (Linux), `smartylens_mac.m` (macOS).
 
 Windows, with Python installed:
 
@@ -84,6 +96,12 @@ Linux (Debian/Ubuntu):
 ```
 sudo apt install gcc pkg-config libgtk-3-dev libcurl4-openssl-dev
 sh build_linux.sh
+```
+
+macOS (needs the Xcode command line tools, `xcode-select --install`):
+
+```
+sh build_mac.sh
 ```
 
 Diagnostics: `SmartyLens.exe --cerca "np.linspace"` opens the panel straight away for a name; `SmartyLens.exe --test-cattura` checks selection capture and clipboard restore and writes the result to `dati\prova.txt`.
